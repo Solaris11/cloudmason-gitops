@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: api-gateway
-          image: egbayram/api-gateway:v1.0.0
+          image: egbayram/api-gateway:v1.1.0
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3000
