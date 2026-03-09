@@ -16,28 +16,28 @@ spec:
         app: api-gateway
     spec:
       containers:
-      - name: api-gateway
-        image: cloudmason/api-gateway:v1.0.0
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 3000
-        # SRE Pratiği: Container'ın yaşayıp yaşamadığını kontrol eden problar
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 3000
-          initialDelaySeconds: 5
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /health
-            port: 3000
-          initialDelaySeconds: 5
-          periodSeconds: 10
-        resources:
-          requests:
-            cpu: "100m"
-            memory: "128Mi"
-          limits:
-            cpu: "250m"
-            memory: "256Mi"
+        - name: api-gateway
+          image: egbayram/api-gateway:v1.0.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+          # SRE Pratiği: Container'ın yaşayıp yaşamadığını kontrol eden problar
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
