@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     # Argo CD'nin izleyeceği GitHub repomuz (Private ise daha sonra SSH/Token ekleyeceğiz)
-    repoURL: 'git@github.com:Solaris11/cloudmason-gitops.git' 
+    repoURL: 'https://github.com/Solaris11/cloudmason-gitops.git'
     targetRevision: HEAD
     path: kubernetes/apps/api-gateway # Git içindeki yaml'ların olduğu hedef klasör
   destination:
