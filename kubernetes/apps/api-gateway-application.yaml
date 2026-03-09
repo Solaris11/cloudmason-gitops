@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: api-gateway
+  namespace: argocd # Bu manifestonun Argo CD'nin kendi namespace'inde durması şarttır
+spec:
+  project: default
+  source:
+    # Argo CD'nin izleyeceği GitHub repomuz (Private ise daha sonra SSH/Token ekleyeceğiz)
+    repoURL: 'git@github.com:Solaris11/cloudmason-gitops.git' 
+    targetRevision: HEAD
+    path: kubernetes/apps/api-gateway # Git içindeki yaml'ların olduğu hedef klasör
+  destination:
+    server: 'https://kubernetes.default.svc' # Kendi içindeki cluster'a kur
+    namespace: default # Uygulamanın çalışacağı namespace
+  syncPolicy:
+    automated:
+      prune: true      # Git'ten silinen dosyayı cluster'dan da sil
+      selfHeal: true   # Biri manuel cluster'da değişiklik yaparsa, Git'teki haline geri döndür
