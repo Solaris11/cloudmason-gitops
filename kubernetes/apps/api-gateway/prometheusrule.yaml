@@ -2,6 +2,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   name: api-gateway-rules
+  namespace: monitoring
   labels:
     # Prometheus Operator sadece bu etikete sahip kuralları dikkate alır!
     release: prometheus-stack
