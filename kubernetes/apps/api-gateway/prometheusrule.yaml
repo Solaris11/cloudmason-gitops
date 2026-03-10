@@ -1,0 +1,31 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: api-gateway-rules
+  labels:
+    # Prometheus Operator sadece bu etikete sahip kuralları dikkate alır!
+    release: prometheus-stack
+spec:
+  groups:
+  - name: api-gateway.rules
+    rules:
+
+    # Alert 1: Is the service completely DOWN?
+    - alert: APIGatewayDown
+      expr: up{job="api-gateway"} == 0
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: "API Gateway is DOWN"
+        description: "The API Gateway service ({{ $labels.instance }}) has been unreachable for more than 1 minute. Traffic is dropping. Immediate action required."
+
+    # Alert 2: Are we getting too many 500 Server Errors? (>5% error rate)
+    - alert: APIGatewayHighErrorRate
+      expr: sum(rate(http_requests_total{service="api-gateway", status_code=~"5.."}[5m])) / sum(rate(http_requests_total{service="api-gateway"}[5m])) > 0.05
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: "API Gateway High Error Rate"
+        description: "More than 5% of requests to the API Gateway are failing with 5xx server errors over the last 5 minutes. Check the application logs."
