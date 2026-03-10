@@ -9,6 +9,7 @@ spec:
   selector:
     app: api-gateway
   ports:
-  - port: 80        # Diğer servislerin Gateway'e ulaşacağı port
+  - name: http
+    port: 80        # Diğer servislerin Gateway'e ulaşacağı port
     targetPort: 3000 # Gateway'in içeride dinlediği gerçek port
     protocol: TCP
