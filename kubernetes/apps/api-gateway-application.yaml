@@ -17,3 +17,4 @@ spec:
     automated:
       prune: true      # Git'ten silinen dosyayı cluster'dan da sil
       selfHeal: true   # Biri manuel cluster'da değişiklik yaparsa, Git'teki haline geri döndür
+ 

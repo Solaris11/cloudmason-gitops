@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: identity-service
+  namespace: apps
 spec:
   replicas: 1
   selector:
@@ -14,19 +15,20 @@ spec:
     spec:
       containers:
       - name: identity-service
-        image: egbayram/identity-service:v1.1.1
+        image: egbayram/identity-service:v1.2.0
         ports:
         - containerPort: 3001
         env:
         - name: DB_HOST
-          value: "identity-db"
+          value: "identity-db.infrastructure.svc.cluster.local"
         - name: REDIS_HOST
-          value: "session-redis"
+          value: "session-redis.infrastructure.svc.cluster.local"
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: identity-service
+  namespace: apps
 spec:
   selector:
     app: identity-service

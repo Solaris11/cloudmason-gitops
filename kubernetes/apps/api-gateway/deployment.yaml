@@ -2,11 +2,11 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: api-gateway
-  namespace: default # İleride bunu cloudmason namespace'ine alabiliriz
+  namespace: apps
   labels:
     app: api-gateway
 spec:
-  replicas: 2 # Yüksek erişilebilirlik (HA) için 2 kopya çalıştırıyoruz
+  replicas: 2
   selector:
     matchLabels:
       app: api-gateway
@@ -17,11 +17,13 @@ spec:
     spec:
       containers:
         - name: api-gateway
-          image: egbayram/api-gateway:v1.3.0
+          image: egbayram/api-gateway:v1.4.0
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3000
-          # SRE Pratiği: Container'ın yaşayıp yaşamadığını kontrol eden problar
+          env:
+            - name: IDENTITY_SERVICE_URL
+              value: "http://identity-service.apps.svc.cluster.local/validate"
           livenessProbe:
             httpGet:
               path: /health
