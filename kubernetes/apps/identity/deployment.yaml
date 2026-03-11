@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: identity-service
-        image: egbayram/identity-service:v1.2.0
+        image: egbayram/identity-service:v1.2.1
         ports:
         - containerPort: 3001
         env:
