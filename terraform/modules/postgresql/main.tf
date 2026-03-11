@@ -29,7 +29,11 @@ resource "helm_release" "postgresql" {
   repository = "https://charts.bitnami.com/bitnami"
   chart      = "postgresql"
   namespace  = var.namespace
-  version    = "12.12.x"
+  timeout    = 600
+  set {
+    name  = "primary.persistence.enabled"
+    value = "false"
+  }
 
   set {
     name  = "global.postgresql.auth.existingSecret"

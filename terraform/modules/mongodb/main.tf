@@ -30,7 +30,11 @@ resource "helm_release" "mongodb" {
   repository = "https://charts.bitnami.com/bitnami"
   chart      = "mongodb"
   namespace  = var.namespace
-  version    = "13.18.x"
+  timeout    = 600
+  set {
+    name  = "persistence.enabled"
+    value = "false"
+  }
 
   set {
     name  = "auth.existingSecret"

@@ -19,7 +19,11 @@ resource "helm_release" "redis" {
   repository = "https://charts.bitnami.com/bitnami"
   chart      = "redis"
   namespace  = var.namespace
-  version    = "18.0.x"
+  timeout    = 600
+  set {
+    name  = "master.persistence.enabled"
+    value = "false"
+  }
 
   set {
     name  = "auth.existingSecret"

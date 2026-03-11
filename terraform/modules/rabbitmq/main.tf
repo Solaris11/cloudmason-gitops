@@ -8,8 +8,8 @@ resource "kubernetes_secret" "rabbitmq_credentials" {
     name      = "rabbitmq-admin-credentials"
     namespace = var.namespace
   }
+
   data = {
-    # Bitnami chart expects this specific key
     "rabbitmq-password" = random_password.rabbitmq_admin.result
   }
 }
@@ -19,14 +19,20 @@ resource "helm_release" "rabbitmq" {
   repository = "https://charts.bitnami.com/bitnami"
   chart      = "rabbitmq"
   namespace  = var.namespace
-  version    = "12.2.x"
+  timeout    = 600
 
   set {
     name  = "auth.username"
     value = "admin"
   }
+
   set {
     name  = "auth.existingPasswordSecret"
     value = kubernetes_secret.rabbitmq_credentials.metadata[0].name
+  }
+
+  set {
+    name  = "persistence.enabled"
+    value = "false"
   }
 }
