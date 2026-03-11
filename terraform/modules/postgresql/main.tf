@@ -30,6 +30,8 @@ resource "helm_release" "postgresql" {
   chart      = "postgresql"
   namespace  = var.namespace
   timeout    = 600
+  version    = "13.2.0"
+
   set {
     name  = "primary.persistence.enabled"
     value = "false"

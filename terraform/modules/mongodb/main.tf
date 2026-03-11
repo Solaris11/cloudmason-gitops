@@ -31,6 +31,8 @@ resource "helm_release" "mongodb" {
   chart      = "mongodb"
   namespace  = var.namespace
   timeout    = 600
+  version    = "14.3.0"
+
   set {
     name  = "persistence.enabled"
     value = "false"

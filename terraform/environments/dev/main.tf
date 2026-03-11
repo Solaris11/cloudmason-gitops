@@ -14,7 +14,7 @@ terraform {
     }
     helm = {
       source  = "hashicorp/helm"
-      version = "~> 2.11"
+      version = "~> 2.13"
     }
     random = {
       source  = "hashicorp/random"
@@ -47,7 +47,6 @@ module "k8s_cluster" {
 module "rabbitmq" {
   source    = "../../modules/rabbitmq"
   namespace = "messaging"
-
   depends_on = [module.k8s_cluster]
 }
 
@@ -62,7 +61,7 @@ module "postgresql" {
     "audit_workflow_db"
   ]
 
-  depends_on = [module.k8s_cluster]
+  depends_on = [module.k8s_cluster, module.rabbitmq]
 }
 
 module "mongodb" {
@@ -76,12 +75,12 @@ module "mongodb" {
     "notifications_log"
   ]
 
-  depends_on = [module.k8s_cluster]
+  depends_on = [module.k8s_cluster, module.postgresql]
 }
 
 module "redis" {
   source    = "../../modules/redis"
   namespace = "databases"
 
-  depends_on = [module.k8s_cluster]
+  depends_on = [module.k8s_cluster, module.mongodb]
 }

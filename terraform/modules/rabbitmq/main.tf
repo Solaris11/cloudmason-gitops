@@ -20,6 +20,7 @@ resource "helm_release" "rabbitmq" {
   chart      = "rabbitmq"
   namespace  = var.namespace
   timeout    = 600
+  version    = "12.8.0"
 
   set {
     name  = "auth.username"

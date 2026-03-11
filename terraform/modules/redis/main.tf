@@ -20,6 +20,8 @@ resource "helm_release" "redis" {
   chart      = "redis"
   namespace  = var.namespace
   timeout    = 600
+  version    = "18.3.0"
+  
   set {
     name  = "master.persistence.enabled"
     value = "false"
