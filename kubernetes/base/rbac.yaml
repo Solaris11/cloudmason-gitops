@@ -1,0 +1,92 @@
+# Creates a dedicated ServiceAccount in each application namespace
+# avoiding the insecure practice of binding roles to the 'default' namespace.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cloudmason-service-account
+  namespace: gateway
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cloudmason-service-account
+  namespace: auth
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cloudmason-service-account
+  namespace: ai
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cloudmason-service-account
+  namespace: commerce
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cloudmason-service-account
+  namespace: communication
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cloudmason-service-account
+  namespace: workflow
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cloudmason-service-account
+  namespace: workers
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cloudmason-service-account
+  namespace: user-ops
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: cloudmason-app-role
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps", "secrets"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: cloudmason-app-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cloudmason-app-role
+subjects:
+  - kind: ServiceAccount
+    name: cloudmason-service-account
+    namespace: gateway
+  - kind: ServiceAccount
+    name: cloudmason-service-account
+    namespace: auth
+  - kind: ServiceAccount
+    name: cloudmason-service-account
+    namespace: ai
+  - kind: ServiceAccount
+    name: cloudmason-service-account
+    namespace: commerce
+  - kind: ServiceAccount
+    name: cloudmason-service-account
+    namespace: communication
+  - kind: ServiceAccount
+    name: cloudmason-service-account
+    namespace: workflow
+  - kind: ServiceAccount
+    name: cloudmason-service-account
+    namespace: workers
+  - kind: ServiceAccount
+    name: cloudmason-service-account
+    namespace: user-ops

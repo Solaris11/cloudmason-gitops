@@ -1,74 +1,87 @@
+# Architecture Note:
+# 1. The local dev K3d cluster is created externally by the bootstrap.sh script.
+# 2. Terraform assumes the cluster exists, validates the context, and deploys
+#    the foundational datastores (PostgreSQL, MongoDB, Redis, RabbitMQ) into it.
+# 3. Future Production Direction: This will evolve so Terraform directly provisions
+#    the managed Kubernetes clusters (EKS/GKE) and their node groups.
+
 terraform {
+  required_version = ">= 1.5.0"
   required_providers {
-    null = {
-      source  = "hashicorp/null"
-      version = "~> 3.2.0"
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 2.23"
     }
     helm = {
       source  = "hashicorp/helm"
-      version = "~> 2.12.0"
+      version = "~> 2.11"
     }
-    kubernetes = {
-      source  = "hashicorp/kubernetes"
-      version = "~> 2.25.0"
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.5"
+    }
+    null = {
+      source  = "hashicorp/null"
+      version = "~> 3.2"
     }
   }
 }
 
-# 1. Aşama: K3s Cluster'ını k3d ile Yaratma (Null Resource ile CLI tetikleme)
-resource "null_resource" "k3d_cluster" {
-  # Cluster'ı yarat
-  provisioner "local-exec" {
-    command = "k3d cluster create cloudmason-dev --port '8080:80@loadbalancer' --port '8443:443@loadbalancer' --wait"
-  }
-
-  # Terraform destroy edildiğinde cluster'ı temizle
-  provisioner "local-exec" {
-    when    = destroy
-    command = "k3d cluster delete cloudmason-dev"
-  }
-}
-
-# 2. Aşama: Kubernetes ve Helm Provider'larını Yapılandırma
-# Not: ~/.kube/config dosyası k3d tarafından otomatik güncellenir
 provider "kubernetes" {
-  config_path = "~/.kube/config"
+  config_path    = "~/.kube/config"
+  config_context = "k3d-${var.cluster_name}"
 }
 
 provider "helm" {
   kubernetes {
-    config_path = "~/.kube/config"
+    config_path    = "~/.kube/config"
+    config_context = "k3d-${var.cluster_name}"
   }
 }
 
-# 3. Aşama: Argo CD için Namespace Oluştur (Cluster ayağa kalktıktan sonra)
-resource "kubernetes_namespace" "argocd" {
-  depends_on = [null_resource.k3d_cluster]
-
-  metadata {
-    name = "argocd"
-  }
+module "k8s_cluster" {
+  source       = "../../modules/k8s_cluster"
+  cluster_name = var.cluster_name
 }
 
-# 4. Aşama: Argo CD'yi Helm ile K3s'e Kur
-resource "helm_release" "argocd" {
-  depends_on = [kubernetes_namespace.argocd]
+module "rabbitmq" {
+  source    = "../../modules/rabbitmq"
+  namespace = "messaging"
 
-  name       = "argocd"
-  repository = "https://argoproj.github.io/argo-helm"
-  chart      = "argo-cd"
-  namespace  = kubernetes_namespace.argocd.metadata[0].name
-  version    = "6.2.4"
+  depends_on = [module.k8s_cluster]
+}
 
-  # Lokal ortamda arayüze kolay erişmek için NodePort kullanıyoruz
-  set {
-    name  = "server.service.type"
-    value = "NodePort"
-  }
+module "postgresql" {
+  source    = "../../modules/postgresql"
+  namespace = "databases"
+  db_names  = [
+    "identity_db",
+    "security_db",
+    "pricing_db",
+    "offer_db",
+    "audit_workflow_db"
+  ]
 
-  # Güvenlik uyarısını (TLS) lokal testler için atlıyoruz
-  set {
-    name  = "server.extraArgs[0]"
-    value = "--insecure"
-  }
+  depends_on = [module.k8s_cluster]
+}
+
+module "mongodb" {
+  source    = "../../modules/mongodb"
+  namespace = "databases"
+  db_names  = [
+    "core_ai_metadata",
+    "system_design_repo",
+    "architecture_outputs",
+    "contact_db",
+    "notifications_log"
+  ]
+
+  depends_on = [module.k8s_cluster]
+}
+
+module "redis" {
+  source    = "../../modules/redis"
+  namespace = "databases"
+
+  depends_on = [module.k8s_cluster]
 }
