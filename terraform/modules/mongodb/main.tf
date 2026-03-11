@@ -9,7 +9,6 @@ resource "kubernetes_secret" "mongo_credentials" {
     namespace = var.namespace
   }
   data = {
-    # Bitnami chart expects these specific keys
     "mongodb-passwords"     = random_password.mongo_admin.result
     "mongodb-root-password" = random_password.mongo_admin.result
   }
@@ -27,16 +26,10 @@ resource "kubernetes_config_map" "mongo_init" {
 
 resource "helm_release" "mongodb" {
   name       = "platform-mongodb"
-  repository = "https://charts.bitnami.com/bitnami"
+  repository = "oci://registry-1.docker.io/bitnamicharts" # YENİ OCI ADRESİ
   chart      = "mongodb"
   namespace  = var.namespace
   timeout    = 600
-  version    = "14.3.0"
-
-  set {
-    name  = "persistence.enabled"
-    value = "false"
-  }
 
   set {
     name  = "auth.existingSecret"
@@ -46,5 +39,10 @@ resource "helm_release" "mongodb" {
   set {
     name  = "initdbScriptsConfigMap"
     value = kubernetes_config_map.mongo_init.metadata[0].name
+  }
+
+  set {
+    name  = "persistence.enabled"
+    value = "false"
   }
 }

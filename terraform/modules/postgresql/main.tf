@@ -9,7 +9,6 @@ resource "kubernetes_secret" "postgres_credentials" {
     namespace = var.namespace
   }
   data = {
-    # Bitnami chart expects this specific key
     "postgres-password" = random_password.postgres_admin.result
   }
 }
@@ -26,16 +25,10 @@ resource "kubernetes_config_map" "pg_init" {
 
 resource "helm_release" "postgresql" {
   name       = "platform-postgres"
-  repository = "https://charts.bitnami.com/bitnami"
+  repository = "oci://registry-1.docker.io/bitnamicharts" # YENİ OCI ADRESİ
   chart      = "postgresql"
   namespace  = var.namespace
   timeout    = 600
-  version    = "13.2.0"
-
-  set {
-    name  = "primary.persistence.enabled"
-    value = "false"
-  }
 
   set {
     name  = "global.postgresql.auth.existingSecret"
@@ -45,5 +38,10 @@ resource "helm_release" "postgresql" {
   set {
     name  = "primary.initdb.scriptsConfigMap"
     value = kubernetes_config_map.pg_init.metadata[0].name
+  }
+
+  set {
+    name  = "primary.persistence.enabled"
+    value = "false"
   }
 }

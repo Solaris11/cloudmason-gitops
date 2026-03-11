@@ -9,34 +9,34 @@ resource "kubernetes_secret" "redis_credentials" {
     namespace = var.namespace
   }
   data = {
-    # Bitnami chart expects this specific key
     "redis-password" = random_password.redis_admin.result
   }
 }
 
 resource "helm_release" "redis" {
   name       = "platform-redis"
-  repository = "https://charts.bitnami.com/bitnami"
+  repository = "oci://registry-1.docker.io/bitnamicharts" # YENİ OCI ADRESİ
   chart      = "redis"
   namespace  = var.namespace
   timeout    = 600
-  version    = "18.3.0"
-  
-  set {
-    name  = "master.persistence.enabled"
-    value = "false"
-  }
 
   set {
     name  = "auth.existingSecret"
     value = kubernetes_secret.redis_credentials.metadata[0].name
   }
+
   set {
     name  = "auth.existingSecretPasswordKey"
     value = "redis-password"
   }
+
   set {
     name  = "architecture"
-    value = "standalone" # MVP configuration
+    value = "standalone"
+  }
+
+  set {
+    name  = "master.persistence.enabled"
+    value = "false"
   }
 }
